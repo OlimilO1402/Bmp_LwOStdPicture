@@ -9,6 +9,24 @@ Begin VB.Form Form1
    ScaleHeight     =   5220
    ScaleWidth      =   5805
    StartUpPosition =   3  'Windows-Standard
+   Begin VB.PictureBox Picture1 
+      Height          =   3735
+      Left            =   120
+      ScaleHeight     =   3675
+      ScaleWidth      =   4755
+      TabIndex        =   0
+      Top             =   1080
+      Width           =   4815
+   End
+   Begin VB.PictureBox Picture2 
+      Height          =   3975
+      Left            =   120
+      ScaleHeight     =   3915
+      ScaleWidth      =   5355
+      TabIndex        =   4
+      Top             =   1080
+      Width           =   5415
+   End
    Begin VB.CommandButton BtnLoadIPictureDisp 
       Caption         =   "Load IPictureDisp"
       Height          =   375
@@ -33,15 +51,6 @@ Begin VB.Form Form1
       Top             =   120
       Width           =   1935
    End
-   Begin VB.PictureBox Picture1 
-      Height          =   3735
-      Left            =   120
-      ScaleHeight     =   3675
-      ScaleWidth      =   4755
-      TabIndex        =   0
-      Top             =   960
-      Width           =   4815
-   End
 End
 Attribute VB_Name = "Form1"
 Attribute VB_GlobalNameSpace = False
@@ -61,12 +70,13 @@ End Sub
 
 Private Sub BtnLoadIPicture_Click()
     Set m_bmp = LoadPicture(m_PFN)
-    Set m_BmpPic = New_IPicture(m_Pic, m_bmp)
-    Debug.Print "Width:      " & m_BmpPic.Width
-    Debug.Print "Height:     " & m_BmpPic.Height
+    Set Picture1.Picture = m_bmp
+    'Set m_BmpPic = New_IPicture(m_Pic, m_bmp)
+    'Debug.Print "Width:      " & m_BmpPic.Width
+    'Debug.Print "Height:     " & m_BmpPic.Height
     'Debug.Print "Type:       " & m_BmpPic.Type
     'Debug.Print "CurDC:      " & m_BmpPic.CurDC
-    Debug.Print "Attributes: " & m_BmpPic.Attributes
+    'Debug.Print "Attributes: " & m_BmpPic.Attributes
     'Debug.Print "Handle:     " & m_BmpPic.Handle
     'Debug.Print "hPal:       " & m_BmpPic.hPal
     'Debug.Print "KeepOriFmt: " & m_BmpPic.KeepOriginalFormat

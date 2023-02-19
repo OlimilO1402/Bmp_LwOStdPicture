@@ -4,7 +4,7 @@ Private Declare Function VirtualProtect Lib "kernel32" (ByVal lpAddress As LongP
 Private Const PAGE_EXECUTE_READWRITE As Long = &H40&
 
 Private Declare Function AlphaBlend Lib "msimg32" (ByVal Dst_hDC As LongPtr, ByVal Dst_x As Long, ByVal Dst_y As Long, ByVal Dst_W As Long, ByVal Dst_H As Long, _
-                                                   ByVal Src_hDC As LongPtr, ByVal Src_x As Long, ByVal Src_y As Long, ByVal Src_W As Long, ByVal Src_H As Long, ByVal Blendfunc As Long) As Long
+                                                   ByVal Src_hDC As LongPtr, ByVal Src_x As Long, ByVal Src_y As Long, ByVal Src_W As Long, ByVal Src_H As Long, ByVal BlendFunc As Long) As Long
 
 Private Declare Function CreateCompatibleDC Lib "gdi32" (ByVal hdc As LongPtr) As LongPtr
 Private Declare Function DeleteDC Lib "gdi32" (ByVal hdc As LongPtr) As Long
@@ -22,7 +22,12 @@ Private Type VBGuid
     Data3 As Integer
     Data5(0 To 7) As Byte
 End Type
-
+Private Type Rect
+    Left   As Long
+    Top    As Long
+    Right  As Long
+    Bottom As Long
+End Type
 'A VTable contains pointers to the functions of a class
 Private Type TIPictureVTable
     '0 to 2 IUnknown
@@ -40,6 +45,12 @@ Private m_pIPictureDispVTable As LongPtr
 Public Type TIPicture
     pVTable As LongPtr    ' First element in an object always is a pointer to it's VTable
     refCnt  As Long       ' the reference counter
+    Handle  As LongPtr
+    SrcHDC  As LongPtr
+    hPal    As LongPtr
+    Type    As Long 'Integer
+    Width   As Long
+    Height  As Long
     Picture As IPicture   ' the StdPicture-Variable holding all the bitmap-Data
     FncAlp  As Long       ' the AlphaBlend-function-type
     'CurhDC  As LongPtr    ' the current handle-device-context
@@ -166,8 +177,8 @@ Private Function IUnknown_FncQueryInterface(this As TIPicture, riid As VBGuid, p
                 Exit Function
             End If
             If .Data1 = d1 + 1 Then
-                'OK you want IPictureDisp
-                Debug.Print "IUnknown_FncQueryInterface IPictureDisp"
+                'OK you want Picture
+                Debug.Print "IUnknown_FncQueryInterface Picture"
                 pvObj = VarPtr(this) '<-- important!
                 IUnknown_FncQueryInterface = S_OK ' yes we have this Interface
                 Exit Function
@@ -247,7 +258,8 @@ End Function
 '            /* [in] */ __RPC__in LPCRECT pRcWBounds);
 Private Function IPicture_SubRender(this As TIPicture, ByVal Dst_hDC As LongPtr, _
                                     ByVal Dst_x As Long, ByVal Dst_y As Long, ByVal Dst_cx As Long, ByVal Dst_cy As Long, _
-                                    ByVal Src_x As Long, ByVal Src_y As Long, ByVal Src_cx As Long, ByVal Src_cy As Long) As Long
+                                    ByVal Src_x As Long, ByVal Src_y As Long, ByVal Src_cx As Long, ByVal Src_cy As Long, _
+                                    pRcWBound As Rect) As Long
     'This.CurhDC = Dst_hDC '???
     
     Dim Src_hDC As LongPtr: Src_hDC = CreateCompatibleDC(0&)
