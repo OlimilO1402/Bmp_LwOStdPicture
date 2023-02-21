@@ -71,19 +71,19 @@ End Sub
 Private Sub BtnLoadIPicture_Click()
     Set m_bmp = LoadPicture(m_PFN)
     Set Picture1.Picture = m_bmp
-    'Set m_BmpPic = New_IPicture(m_Pic, m_bmp)
-    'Debug.Print "Width:      " & m_BmpPic.Width
-    'Debug.Print "Height:     " & m_BmpPic.Height
-    'Debug.Print "Type:       " & m_BmpPic.Type
-    'Debug.Print "CurDC:      " & m_BmpPic.CurDC
+    Set m_BmpPic = New_IPicture(m_Pic, m_bmp)
+    Debug.Print "Handle:     " & m_BmpPic.Handle
+    Debug.Print "hPal:       " & m_BmpPic.hPal
+    Debug.Print "Type:       " & m_BmpPic.Type
+    Debug.Print "Width:      " & m_BmpPic.Width
+    Debug.Print "Height:     " & m_BmpPic.Height
+    Debug.Print "CurDC:      " & m_BmpPic.CurDC
     'Debug.Print "Attributes: " & m_BmpPic.Attributes
-    'Debug.Print "Handle:     " & m_BmpPic.Handle
-    'Debug.Print "hPal:       " & m_BmpPic.hPal
     'Debug.Print "KeepOriFmt: " & m_BmpPic.KeepOriginalFormat
-    'Debug.Print "KeepOriFmt: " & m_BmpPic.SetHdc
+    'Debug.Print "SetHdc: " & m_BmpPic.SetHdc
     'Debug.Print "KeepOriFmt: " & m_BmpPic.KeepOriginalFormat
     
-    'Set Picture1.Picture = m_BmpPic ' New_IPicture(m_Pic, m_bmp)
+    Set Picture1.Picture = m_BmpPic ' New_IPicture(m_Pic, m_bmp)
 End Sub
 
 'Private Sub BtnLoadIPictureDisp_Click()
