@@ -4,6 +4,7 @@ Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#C:\WINDOWS\SysWow64\st
 Module=MStdPic; Modules\MStdPic.bas
 Module=MPtr; ..\Ptr_Pointers\Modules\MPtr.bas
 Class=AlphaPB; ..\Color_Algorithms\Classes\AlphaPB.cls
+Module=MNew; Modules\MNew.bas
 IconForm="Form1"
 Startup="Form1"
 ExeName32="PBmpLwOStdPic.exe"
