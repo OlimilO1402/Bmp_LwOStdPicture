@@ -4,11 +4,53 @@ Begin VB.Form Form1
    ClientHeight    =   5220
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   5805
+   ClientWidth     =   9765
    LinkTopic       =   "Form1"
    ScaleHeight     =   5220
-   ScaleWidth      =   5805
+   ScaleWidth      =   9765
    StartUpPosition =   3  'Windows-Standard
+   Begin VB.CommandButton Command3 
+      Caption         =   "Command3"
+      Height          =   375
+      Left            =   7080
+      TabIndex        =   9
+      Top             =   480
+      Width           =   1935
+   End
+   Begin VB.TextBox Text2 
+      BeginProperty Font 
+         Name            =   "Consolas"
+         Size            =   9.75
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   2895
+      Left            =   7080
+      MultiLine       =   -1  'True
+      TabIndex        =   8
+      Top             =   1080
+      Width           =   2535
+   End
+   Begin VB.TextBox Text1 
+      BeginProperty Font 
+         Name            =   "Consolas"
+         Size            =   9.75
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   2775
+      Left            =   4440
+      MultiLine       =   -1  'True
+      TabIndex        =   7
+      Top             =   1080
+      Width           =   2535
+   End
    Begin VB.CommandButton Command2 
       Caption         =   "Command2"
       Height          =   375
@@ -26,21 +68,21 @@ Begin VB.Form Form1
       Width           =   1815
    End
    Begin VB.PictureBox Picture2 
-      Height          =   3975
+      Height          =   3735
       Left            =   120
-      ScaleHeight     =   3915
-      ScaleWidth      =   5355
+      ScaleHeight     =   3675
+      ScaleWidth      =   4155
       TabIndex        =   3
       Top             =   1080
-      Width           =   5415
+      Width           =   4215
       Begin VB.PictureBox Picture1 
-         Height          =   3735
+         Height          =   3495
          Left            =   0
-         ScaleHeight     =   3675
-         ScaleWidth      =   4755
+         ScaleHeight     =   3435
+         ScaleWidth      =   3915
          TabIndex        =   5
          Top             =   0
-         Width           =   4815
+         Width           =   3975
       End
    End
    Begin VB.CommandButton BtnLoadIPictureDisp 
@@ -96,22 +138,38 @@ Private Sub Form_Load()
 End Sub
 
 Private Sub BtnLoadIPicture_Click()
-    Set m_bmp = LoadPicture(m_PFN)
-    Set Picture1.Picture = m_bmp
-    Set m_BmpPic = New_IPicture(m_Pic, m_bmp)
-    Debug.Print "Handle:     " & m_BmpPic.Handle
-    Debug.Print "hPal:       " & m_BmpPic.hPal
-    Debug.Print "Type:       " & m_BmpPic.Type
-    Debug.Print "Width:      " & m_BmpPic.Width
-    Debug.Print "Height:     " & m_BmpPic.Height
-    Debug.Print "CurDC:      " & m_BmpPic.CurDC
-    'Debug.Print "Attributes: " & m_BmpPic.Attributes
-    'Debug.Print "KeepOriFmt: " & m_BmpPic.KeepOriginalFormat
-    'Debug.Print "SetHdc: " & m_BmpPic.SetHdc
-    'Debug.Print "KeepOriFmt: " & m_BmpPic.KeepOriginalFormat
+Try: On Error GoTo Catch
     
-    Set Picture1.Picture = m_BmpPic ' New_IPicture(m_Pic, m_bmp)
+    Set m_bmp = LoadPicture(m_PFN)
+    Text1.Text = IPicture_ToStr(m_bmp)
+    Set Picture1.Picture = m_bmp
+Catch:
+    '
 End Sub
+
+Private Sub Command3_Click()
+Try: On Error GoTo Catch
+    
+    Set m_BmpPic = New_IPicture(m_Pic, m_bmp)
+    Dim s As String
+    s = IPicture_ToStr(m_BmpPic)
+    'Set Picture1.Picture = m_BmpPic ' New_IPicture(m_Pic, m_bmp)
+Catch:
+    Text2.Text = s
+End Sub
+
+Private Function IPicture_ToStr(bmp As IPicture) As String
+Try: On Error GoTo Catch
+    Dim s As String
+    s = s & "Handle: " & bmp.Handle & vbCrLf
+    s = s & "hPal:   " & bmp.hPal & vbCrLf
+    s = s & "Type:   " & bmp.Type & vbCrLf
+    s = s & "Width:  " & bmp.Width & vbCrLf
+    s = s & "Height: " & bmp.Height & vbCrLf
+    s = s & "CurDC:  " & bmp.CurDC & vbCrLf
+Catch:
+    IPicture_ToStr = s
+End Function
 
 'Private Sub BtnLoadIPictureDisp_Click()
 '    Set Picture1.Picture = New_IPictureDisp(m_Pic, LoadPicture(m_PFN))

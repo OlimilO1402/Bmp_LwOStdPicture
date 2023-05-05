@@ -9,13 +9,18 @@ Private Declare Function AlphaBlend Lib "msimg32" (ByVal Dst_hDC As LongPtr, ByV
 Private Declare Function CreateCompatibleDC Lib "gdi32" (ByVal hdc As LongPtr) As LongPtr
 Private Declare Function DeleteDC Lib "gdi32" (ByVal hdc As LongPtr) As Long
 Private Declare Function SelectObject Lib "gdi32" (ByVal hdc As LongPtr, ByVal hObject As LongPtr) As LongPtr
+Private Declare Function StringFromGUID2 Lib "ole32" (ByRef rguid As VBGuid, ByVal lpsz As LongPtr, ByVal cchMax As Long) As Long
 
 'A Lightweight object wrapping a StdPicture-objekt and implementing an AlphaBlend-Render-function
+Private Const IID_IUnkown      As String = "{00000000-0000-0000-C000-000000000046}"
+Private Const IID_IDispatch    As String = "{00020400-0000-0000-C000-000000000046}"
+
 Private Const IID_StdPicture   As String = "{0BE35204-8F91-11CE-9DE3-00AA004BB851}"
 'GUID of IPicture:                         "{7BF80980-BF32-101A-8BBB-00AA00300CAB}"
 Private Const IID_IPicture     As String = "{7BF80980-BF32-101A-8BBB-00AA00300CAB}"
 'GUID of IPictureDisp:                     "{7BF80981-BF32-101A-8BBB-00AA00300CAB}"
 Private Const IID_IPictureDisp As String = "{7BF80981-BF32-101A-8BBB-00AA00300CAB}"
+
 Private Type VBGuid
     Data1 As Long
     Data2 As Integer
@@ -152,6 +157,10 @@ Public Function New_IPicture(this As TIPicture, aPicture As IPicture, Optional B
     End With
     'bring the object to life
     RtlMoveMemory New_IPicture, VarPtr(this), SizeOf_LongPtr
+    Dim obj As IPicture: Set obj = New_IPicture
+    'Dim obj As IUnknown: Set obj = New_IPicture
+    RtlZeroMemory obj, SizeOf_LongPtr
+    'Set New_IPicture = MPtr.PtrToObject(VarPtr(m_pIPictureVTable)) 'VarPtr(this))
 End Function
 
 'Public Function New_IPictureDisp(this As TIPicture, aPicture As IPicture, Optional ByVal AlphaFunc As Long = &H1FF0000) As IPictureDisp
@@ -168,9 +177,11 @@ End Function
 
 ' v ############################## v '    IUnkown    ' v ############################## v '
 Private Function IUnknown_FncQueryInterface(this As TIPicture, riid As VBGuid, pvObj As Long) As Long
-    Debug.Print "IUnknown_FncQueryInterface"
+    'Debug.Print "IUnknown_FncQueryInterface"
     '7BF80981-BF32-101A-8BBB-00AA00300CAB
     With riid
+        'ask for IUnknown:
+        'Debug.Print VBGuid_ToStr(riid)
         'do you want IPicture or IPictureDisp?
         If .Data2 = &HBF32 And .Data3 = &H101A And _
            .Data5(0) = &H8B And .Data5(1) = &HBB And .Data5(2) = &H0 And .Data5(3) = &HAA And _
@@ -178,14 +189,14 @@ Private Function IUnknown_FncQueryInterface(this As TIPicture, riid As VBGuid, p
            Const d1 As Long = &H7BF80980
             If .Data1 = d1 Then
                 'OK you want IPicture
-                Debug.Print "IUnknown_FncQueryInterface IPicture"
+                'Debug.Print "IUnknown_FncQueryInterface IPicture"
                 pvObj = VarPtr(this) '<-- important!
                 IUnknown_FncQueryInterface = S_OK ' yes we have this Interface
                 Exit Function
             End If
             If .Data1 = d1 + 1 Then
                 'OK you want Picture
-                Debug.Print "IUnknown_FncQueryInterface Picture"
+                'Debug.Print "IUnknown_FncQueryInterface Picture"
                 pvObj = VarPtr(this) '<-- important!
                 IUnknown_FncQueryInterface = S_OK ' yes we have this Interface
                 Exit Function
@@ -195,7 +206,7 @@ Private Function IUnknown_FncQueryInterface(this As TIPicture, riid As VBGuid, p
 End Function
 
 Private Function IUnknown_SubAddRef(this As TIPicture) As Long
-    Debug.Print "IUnknown_SubAddRef"
+    'Debug.Print "IUnknown_SubAddRef"
     ' now we add one reference
     With this
         .refCnt = .refCnt + 1
@@ -203,7 +214,7 @@ Private Function IUnknown_SubAddRef(this As TIPicture) As Long
 End Function
 
 Private Function IUnknown_SubRelease(this As TIPicture) As Long
-    Debug.Print "IUnknown_SubRelease"
+    'Debug.Print "IUnknown_SubRelease"
     ' now we subtract one reference
     With this
         .refCnt = .refCnt - 1
@@ -214,48 +225,48 @@ End Function
 
 ' v ############################## v '   IDispatch   ' v ############################## v '
 Private Function IDispatch_get_TypeInfoCount(this As TIPicture) As Long
-    Debug.Print "IDispatch_get_TypeInfoCount"
+    'Debug.Print "IDispatch_get_TypeInfoCount"
 End Function
 Private Function IDispatch_get_TypeInfo(this As TIPicture) As Long
-    Debug.Print "IDispatch_get_TypeInfo"
+    'Debug.Print "IDispatch_get_TypeInfo"
 End Function
 Private Function IDispatch_get_IDsOfNames(this As TIPicture) As Long
-    Debug.Print "IDispatch_get_IDsOfNames"
+    'Debug.Print "IDispatch_get_IDsOfNames"
 End Function
 Private Function IDispatch_FncInvoke(this As TIPicture) As Long
-    Debug.Print "IDispatch_FncInvoke"
+    'Debug.Print "IDispatch_FncInvoke"
 End Function
 ' ^ ############################## ^ '   IDispatch   ' ^ ############################## ^ '
 
 ' v ############################## v '    IPicture   ' v ############################## v '
 'HRESULT ( STDMETHODCALLTYPE *get_Handle )( __RPC__in IPicture * This, /* [out] */ __RPC__out OLE_HANDLE *pHandle);
 Private Function IPicture_get_Handle(this As TIPicture, pHandle_out As LongPtr) As Long
-    Debug.Print "IPicture_get_Handle"
+    'Debug.Print "IPicture_get_Handle"
     pHandle_out = this.Picture.Handle
 End Function
 
 'HRESULT ( STDMETHODCALLTYPE *get_hPal )( __RPC__in IPicture * This, /* [out] */ __RPC__out OLE_HANDLE *phPal);
 Private Function IPicture_get_hPal(this As TIPicture, phPal_out As LongPtr) As Long
-    Debug.Print "IPicture_get_hPal"
+    'Debug.Print "IPicture_get_hPal"
     phPal_out = this.Picture.hPal
 End Function
 
 
 'HRESULT ( STDMETHODCALLTYPE *get_Type )( __RPC__in IPicture * This, /* [out] */ __RPC__out SHORT *pType);
 Private Function IPicture_get_Type(this As TIPicture, pType_out As Integer) As Long
-    Debug.Print "IPicture_get_Type"
+    'Debug.Print "IPicture_get_Type"
     pType_out = this.Picture.Type
 End Function
 
 'HRESULT ( STDMETHODCALLTYPE *get_Width )( __RPC__in IPicture * This, /* [out] */ __RPC__out OLE_XSIZE_HIMETRIC *pWidth);
 Private Function IPicture_get_Width(this As TIPicture, pWidth_out As Long) As Long
-    Debug.Print "IPicture_get_Width"
+    'Debug.Print "IPicture_get_Width"
     pWidth_out = this.Picture.Width
 End Function
 
 'HRESULT ( STDMETHODCALLTYPE *get_Height )( __RPC__in IPicture * This, /* [out] */ __RPC__out OLE_YSIZE_HIMETRIC *pHeight);
 Private Function IPicture_get_Height(this As TIPicture, pHeight_out As Long) As Long
-    Debug.Print "IPicture_get_Height"
+    'Debug.Print "IPicture_get_Height"
     pHeight_out = this.Picture.Height
 End Function
 
@@ -277,7 +288,7 @@ Private Function IPicture_SubRender(this As TIPicture, ByVal Dst_hDC As LongPtr,
     'This.CurhDC = Dst_hDC '???
     
     Dim Src_hDC As LongPtr: Src_hDC = CreateCompatibleDC(0&)
-    Dim hBmp    As LongPtr:    hBmp = SelectObject(Src_hDC, this.StdPic.Handle)
+    Dim hBmp    As LongPtr:    hBmp = SelectObject(Src_hDC, this.Picture.Handle)
     
     AlphaBlend Dst_hDC, Dst_x, Dst_y, Dst_cx, Dst_cy, Src_hDC, 0, 0, Src_cx, Src_cy, this.FncAlp  ' &H1FF0000
     
@@ -314,7 +325,7 @@ End Function
 '            __RPC__in IPicture * This,
 '            /* [in] */ OLE_HANDLE hPal);
 Private Function IPicture_set_hPal(this As TIPicture, ByVal hPal_in As LongPtr)
-    Debug.Print "IPicture_set_hPal " & hPal_in
+    'Debug.Print "IPicture_set_hPal " & hPal_in
     this.Picture.hPal = hPal_in
 End Function
 
@@ -322,8 +333,12 @@ End Function
 '            __RPC__in IPicture * This,
 '            /* [out] */ __RPC__deref_out_opt HDC *phDC);
 Private Function IPicture_get_CurDC(this As TIPicture, phDC_out As LongPtr)
-    Debug.Print "IPicture_get_CurDC " & phDC_out
-    phDC_out = this.Picture.CurDC ' CurhDC
+    'Debug.Print "IPicture_get_CurDC " & phDC_out
+    'MsgBox "IPicture_get_CurDC " & phDC_out
+    'Dim adc As LongPtr: adc = this.Picture.CurDC
+    'RtlMoveMemory ByVal phDC_out, adc, 4
+    'phDC_out = adc ' CurhDC
+    'phDC_out = this.Picture.CurDC
 End Function
 
 '        HRESULT ( STDMETHODCALLTYPE *SelectPicture )(
@@ -332,7 +347,7 @@ End Function
 '            /* [out] */ __RPC__deref_out_opt HDC *phDCOut,
 '            /* [out] */ __RPC__out OLE_HANDLE *phBmpOut);
 Private Function IPicture_SelectPicture(this As TIPicture, ByVal hDC_in As LongPtr, phDC_out As LongPtr, phBmp_out As LongPtr)
-    Debug.Print "IPicture_SelectPicture " & hDC_in & " " & phDC_out & " " & phBmp_out
+    'Debug.Print "IPicture_SelectPicture " & hDC_in & " " & phDC_out & " " & phBmp_out
     'phDC_out = this.Picture.CurDC 'CurhDC
     'phBmp_out = this.Picture.SelectPicture 'hBmp ' this.StdPic.Handle
     this.Picture.SelectPicture hDC_in, phDC_out, phBmp_out
@@ -342,7 +357,7 @@ End Function
 '            __RPC__in IPicture * This,
 '            /* [out] */ __RPC__out BOOL *pKeep);
 Private Function IPicture_get_KeepOriginalFormat(this As TIPicture, pKeep_out As Long)
-    Debug.Print "IPicture_get_KeepOriginalFormat " & pKeep_out
+    'Debug.Print "IPicture_get_KeepOriginalFormat " & pKeep_out
     pKeep_out = this.Picture.KeepOriginalFormat
     'phDC_out = this.CurhDC
     'phBmp_out = this.StdPic.Handle
@@ -353,7 +368,7 @@ End Function
 '            __RPC__in IPicture * This,
 '            /* [in] */ BOOL keep);
 Private Function IPicture_put_KeepOriginalFormat(this As TIPicture, ByVal bKeep As Boolean)
-    Debug.Print "IPicture_put_KeepOriginalFormat " & bKeep
+    'Debug.Print "IPicture_put_KeepOriginalFormat " & bKeep
     this.Picture.KeepOriginalFormat = bKeep
     'todo
 End Function
@@ -361,7 +376,7 @@ End Function
 '        HRESULT ( STDMETHODCALLTYPE *PictureChanged )(
 '            __RPC__in IPicture * This);
 Private Function IPicture_PictureChanged(this As TIPicture)
-    Debug.Print "IPicture_PictureChanged"
+    'Debug.Print "IPicture_PictureChanged"
     this.Picture.PictureChanged
 End Function
 
@@ -371,7 +386,7 @@ End Function
 '            /* [in] */ BOOL fSaveMemCopy,
 '            /* [out] */ __RPC__out LONG *pCbSize);
 Private Function IPicture_SaveAsFile(this As TIPicture, ByVal pStream_in As LongPtr, ByVal fSaveMemCopy As Boolean, pCbSize_out As Long)
-    Debug.Print "IPicture_SaveAsFile"
+    'Debug.Print "IPicture_SaveAsFile"
     this.Picture.SaveAsFile ByVal pStream_in, fSaveMemCopy, pCbSize_out
 End Function
 
@@ -379,15 +394,21 @@ End Function
 '            __RPC__in IPicture * This,
 '            /* [out] */ __RPC__out DWORD *pDwAttr);
 Private Function IPicture_get_Attributes(this As TIPicture, pDwAttr_out As Long)
-    Debug.Print "IPicture_get_Attributes"
+    'Debug.Print "IPicture_get_Attributes"
     'todo
     pDwAttr_out = this.Picture.Attributes
 End Function
 
 Private Function IPicture_SetHdc(this As TIPicture, ByVal Value As Long)
-    Debug.Print "IPicture_SetHdc"
+    'Debug.Print "IPicture_SetHdc"
     this.Picture.SetHdc Value
 End Function
 
 ' ^ ############################## ^ '    IPicture   ' ^ ############################## ^ '
+
+Private Function VBGuid_ToStr(this As VBGuid) As String
+    Dim s As String: s = String(40, vbNullChar)
+    Dim l As Long: l = StringFromGUID2(this, s, Len(s) - 1)
+    VBGuid_ToStr = Left(s, l - 1)
+End Function
 
